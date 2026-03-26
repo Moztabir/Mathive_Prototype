@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Area Attack • Mathive</title>
+
+<style>
+:root{
+  --c1:#8ECAE6;
+  --c2:#90BE6D;
+  --c3:#FFB703;
+  --ink:#1b1b1b;
+  --muted:#555;
+  --card:#ffffff;
+  --shadow:0 10px 26px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family: ui-rounded, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(60vmax 60vmax at 0% 0%, var(--c1) 0 22%, transparent 23%),
+    radial-gradient(65vmax 65vmax at 100% 100%, var(--c2) 0 22%, transparent 23%),
+    linear-gradient(180deg, #fff, #fff);
+  min-height:100vh;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  overflow-x:hidden;
+}
+
+.game-shell{
+  position:relative;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.game-shell.blur-active .game-content{
+  filter:blur(10px);
+  pointer-events:none;
+  user-select:none;
+}
+
+.game-content{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  flex:1;
+  transition:filter .25s ease;
+}
+
+main{
+  flex:1;
+  display:grid;
+  place-items:center;
+}
+
+.card{
+  width:min(92vw,600px);
+  background:var(--card);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+  padding:16px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.play-timer-wrap{
+  display:flex;
+  justify-content:center;
+  margin-bottom:10px;
+}
+
+.play-timer{
+  background:#f6f6f6;
+  padding:10px 16px;
+  border-radius:999px;
+  font-size:16px;
+  font-weight:1000;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+.rectangle{
+  margin:20px auto 10px;
+  background:rgba(144,190,109,.35);
+  border:3px solid rgba(0,0,0,.08);
+  position:relative;
+}
+
+.dimension{
+  font-weight:1000;
+  margin-top:4px;
+}
+
+.answer{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+input{
+  width:140px;
+  padding:14px;
+  font-size:22px;
+  font-weight:1000;
+  border-radius:14px;
+  border:2px solid #ddd;
+  text-align:center;
+}
+
+input:focus{
+  outline:none;
+  border-color:var(--c1);
+  box-shadow:0 0 0 3px rgba(142,202,230,.3);
+}
+
+.submit{
+  padding:14px 18px;
+  font-size:18px;
+  font-weight:1000;
+  border:none;
+  border-radius:14px;
+  background:var(--c2);
+  cursor:pointer;
+}
+
+.submit:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.msg{
+  margin-top:12px;
+  min-height:26px;
+  font-weight:1000;
+}
+
+.good{ color:#2d7a1f; }
+.bad{ color:#b51e1e; }
+
+.hint{
+  margin:10px auto 14px;
+  padding:10px 14px;
+  width:fit-content;
+  max-width:100%;
+  border-radius:999px;
+  background:#f6f6f6;
+  color:#444;
+  font-size:13px;
+  font-weight:1000;
+  line-height:1.3;
+  text-align:center;
+}
+
+.game-topbar{
+  background:#ffffff;
+  border-radius:20px;
+  box-shadow:0 10px 26px rgba(0,0,0,.08);
+  padding:14px 16px;
+  display:grid;
+  grid-template-columns: 1fr auto auto;
+  gap:14px;
+  align-items:center;
+}
+
+.top-left{
+  min-width:180px;
+}
+
+.game-title{
+  font-size:22px;
+  font-weight:1000;
+  color:#1b1b1b;
+}
+
+.game-subtitle{
+  margin-top:3px;
+  font-size:13px;
+  color:#555;
+  font-weight:700;
+}
+
+.top-center{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px;
+}
+
+.top-pill{
+  background:#f6f6f6;
+  padding:9px 12px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:1000;
+  color:#1b1b1b;
+}
+
+.top-right{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+}
+
+.top-btn{
+  border:none;
+  border-radius:14px;
+  padding:10px 16px;
+  font-size:14px;
+  font-weight:1000;
+  cursor:pointer;
+}
+
+.restart-btn{
+  background:#8ECAE6;
+  color:#0b2a33;
+}
+
+.quit-btn{
+  background:#F28482;
+  color:white;
+}
+
+.restart-btn:hover,
+.quit-btn:hover{
+  filter:brightness(.96);
+}
+
+.bottom-actions{
+  margin-top:18px;
+  display:flex;
+  justify-content:center;
+}
+
+.intro-overlay{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(255,255,255,.18);
+  backdrop-filter:blur(2px);
+}
+
+.intro-card{
+  width:min(92vw, 560px);
+  background:rgba(255,255,255,.96);
+  border-radius:24px;
+  box-shadow:0 16px 40px rgba(0,0,0,.15);
+  padding:24px 22px;
+  text-align:center;
+  border:1px solid rgba(0,0,0,.06);
+}
+
+.intro-kicker{
+  display:inline-block;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#f2f2f2;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:.04em;
+  margin-bottom:12px;
+}
+
+.intro-title{
+  font-size:32px;
+  line-height:1.1;
+  font-weight:1000;
+  margin:0 0 10px;
+}
+
+.intro-desc{
+  margin:0 auto 16px;
+  max-width:44ch;
+  font-size:15px;
+  line-height:1.55;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.intro-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:16px 0 18px;
+  text-align:left;
+}
+
+.intro-box{
+  background:#f8f8f8;
+  border-radius:18px;
+  padding:14px;
+}
+
+.intro-box h3{
+  margin:0 0 8px;
+  font-size:14px;
+  font-weight:1000;
+}
+
+.intro-box p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+  font-weight:700;
+}
+
+.intro-actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.mode-btn{
+  border:none;
+  border-radius:999px;
+  padding:12px 18px;
+  font-size:15px;
+  font-weight:1000;
+  cursor:pointer;
+  min-width:140px;
+  transition:transform .12s ease, filter .12s ease;
+}
+
+.mode-btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(.98);
+}
+
+.mode-easy{
+  background:var(--c2);
+  color:#10321b;
+}
+
+.mode-hard{
+  background:var(--c3);
+  color:#3d2a00;
+}
+
+.countdown-overlay{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:22px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(2px);
+}
+
+.countdown-text{
+  font-size:72px;
+  font-weight:1000;
+  line-height:1;
+  color:#1b1b1b;
+  text-shadow:0 4px 18px rgba(0,0,0,.08);
+  animation:popIn .25s ease;
+}
+
+@keyframes popIn{
+  from{
+    transform:scale(.78);
+    opacity:0;
+  }
+  to{
+    transform:scale(1);
+    opacity:1;
+  }
+}
+
+@media (max-width: 900px){
+  .game-topbar{
+    grid-template-columns: 1fr;
+    text-align:center;
+  }
+
+  .top-left,
+  .top-right{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .top-right{
+    flex-direction:row;
+    justify-content:center;
+  }
+}
+
+@media (max-width: 640px){
+  .intro-grid{
+    grid-template-columns:1fr;
+  }
+
+  .intro-title{
+    font-size:28px;
+  }
+
+  .countdown-text{
+    font-size:60px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="game-shell blur-active" id="gameShell">
+  <div class="game-content">
+    <header class="game-topbar">
+      <div class="top-left">
+        <div class="game-title" id="gameTitle">🟩 Game 5: Area Attack</div>
+        <div class="game-subtitle" id="gameSubtitle">Solve the area before time runs out!</div>
+      </div>
+
+      <div class="top-center">
+        <div class="top-pill">⏱ Time: <span id="time">30</span>s</div>
+        <div class="top-pill">⭐ Score: <span id="score">0</span></div>
+        <div class="top-pill">🔥 Combo: <span id="combo">0</span></div>
+      </div>
+
+      <div class="top-right">
+        <button class="top-btn restart-btn" onclick="restartGame()">Restart</button>
+        <button class="top-btn quit-btn" onclick="quitGame()">Quit</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card" id="gameCard">
+        <div class="play-timer-wrap">
+          <div class="play-timer">⏱ Time Left: <span id="playTime">30</span>s</div>
+        </div>
+
+        <div class="hint">+10 correct • −10 wrong • +5 fast • +25 every 5 combo</div>
+
+        <div id="rectContainer">
+          <div id="rectangle" class="rectangle"></div>
+          <div class="dimension" id="dimensionText">Get ready…</div>
+
+          <div class="answer">
+            <input id="answer" type="number" placeholder="Area" disabled />
+            <button class="submit" id="submitBtn" onclick="check()" disabled>✔</button>
+          </div>
+        </div>
+
+        <div class="msg" id="msg"></div>
+
+        <div class="bottom-actions">
+          <button class="top-btn restart-btn" onclick="restartGame()">Restart</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="intro-overlay" id="introOverlay">
+    <div class="intro-card">
+      <div class="intro-kicker">MATHIVE • GAME INTRO</div>
+      <h1 class="intro-title">Area Attack</h1>
+      <p class="intro-desc">
+        Look at the rectangle, use the side lengths, and calculate the area before time runs out.
+      </p>
+
+      <div class="hint">+10 correct • −10 wrong • +5 fast • +25 every 5 combo</div>
+
+      <div class="intro-grid">
+        <div class="intro-box">
+          <h3>How to Play</h3>
+          <p>Look at the rectangle dimensions, multiply the width by the height, then type the area and submit.</p>
+        </div>
+        <div class="intro-box">
+          <h3>Points</h3>
+          <p>Correct answers give points, fast answers give bonus points, and every 5-answer streak gives a combo reward.</p>
+        </div>
+        <div class="intro-box">
+          <h3>Controls</h3>
+          <p>Type your answer in the input box and press Enter or tap the check button to submit.</p>
+        </div>
+        <div class="intro-box">
+          <h3>Difficulty</h3>
+          <p>Easy uses smaller dimensions. Hard gives larger dimensions for quicker mental math pressure.</p>
+        </div>
+      </div>
+
+      <div class="intro-actions">
+        <button class="mode-btn mode-easy" onclick="beginFromIntro('easy')">Easy</button>
+        <button class="mode-btn mode-hard" onclick="beginFromIntro('hard')">Hard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+
+<script>
+let audioStarted = false;
+
+function initAudio(){
+  if(audioStarted) return;
+  audioStarted = true;
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if(!AudioContextClass) return;
+
+  window.gameAudioCtx = new AudioContextClass();
+}
+
+function playTone(freq, duration, type = 'sine', volume = 0.05){
+  if(!window.gameAudioCtx) return;
+
+  const ctx = window.gameAudioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = volume;
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  osc.stop(ctx.currentTime + duration);
+}
+
+function playCorrectSound(){
+  playTone(660, 0.12, 'sine', 0.06);
+  setTimeout(() => playTone(880, 0.14, 'sine', 0.05), 80);
+}
+
+function playWrongSound(){
+  playTone(220, 0.18, 'square', 0.05);
+  setTimeout(() => playTone(180, 0.2, 'square', 0.04), 90);
+}
+
+function playHighScoreSound(){
+  playTone(523, 0.12, 'triangle', 0.06);
+  setTimeout(() => playTone(659, 0.12, 'triangle', 0.06), 100);
+  setTimeout(() => playTone(784, 0.2, 'triangle', 0.06), 200);
+}
+
+function celebrateHighScore(){
+  if(typeof confetti !== 'function') return;
+
+  confetti({
+    particleCount: 140,
+    spread: 90,
+    origin: { y: 0.6 }
+  });
+
+  setTimeout(() => {
+    confetti({
+      particleCount: 80,
+      angle: 60,
+      spread: 70,
+      origin: { x: 0.1, y: 0.7 }
+    });
+
+    confetti({
+      particleCount: 80,
+      angle: 120,
+      spread: 70,
+      origin: { x: 0.9, y: 0.7 }
+    });
+  }, 200);
+}
+
+function readProfile(){
+  const raw = sessionStorage.getItem('mq_profile') || localStorage.getItem('mq_profile');
+  if(!raw) return null;
+  try{
+    return JSON.parse(raw);
+  }catch{
+    return null;
+  }
+}
+
+if(!readProfile()){
+  window.location.replace('../index.html');
+}
+
+let started = false;
+let ended = false;
+let mode = null;
+let currentDifficulty = null;
+let timeLeft = 30;
+let score = 0;
+let combo = 0;
+let timer = null;
+let width = 0;
+let height = 0;
+let roundStart = 0;
+let countdownRunning = false;
+let gameReady = false;
+
+const timeEl = document.getElementById('time');
+const playTimeEl = document.getElementById('playTime');
+const scoreEl = document.getElementById('score');
+const comboEl = document.getElementById('combo');
+const rect = document.getElementById('rectangle');
+const dimensionText = document.getElementById('dimensionText');
+const msgEl = document.getElementById('msg');
+const ansEl = document.getElementById('answer');
+const submitBtn = document.getElementById('submitBtn');
+const introOverlay = document.getElementById('introOverlay');
+const gameShell = document.getElementById('gameShell');
+const gameCard = document.getElementById('gameCard');
+
+function rand(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function updateHUD(){
+  timeEl.textContent = timeLeft;
+  playTimeEl.textContent = timeLeft;
+  scoreEl.textContent = score;
+  comboEl.textContent = combo;
+}
+
+function setInputsEnabled(enabled){
+  ansEl.disabled = !enabled;
+  submitBtn.disabled = !enabled;
+  if(enabled){
+    ansEl.focus();
+  }
+}
+
+function clearRectangle(){
+  rect.style.width = '0px';
+  rect.style.height = '0px';
+  dimensionText.textContent = 'Get ready…';
+}
+
+function newRectangle(){
+  if(ended) return;
+
+  width = mode === 'easy' ? rand(2, 9) : rand(2, 15);
+  height = mode === 'easy' ? rand(2, 9) : rand(2, 15);
+
+  rect.style.width = (width * 20) + 'px';
+  rect.style.height = (height * 20) + 'px';
+
+  dimensionText.textContent = `${width} × ${height}`;
+  ansEl.value = '';
+  ansEl.focus();
+  roundStart = performance.now();
+
+  msgEl.textContent = '';
+  msgEl.className = 'msg';
+}
+
+function check(){
+  if(!started || ended || !gameReady || timeLeft <= 0) return;
+
+  const correct = width * height;
+  const user = Number(ansEl.value);
+  const secs = (performance.now() - roundStart) / 1000;
+
+  if(user === correct){
+    playCorrectSound();
+    score += 10;
+    combo += 1;
+
+    let message = '✅ Correct! +10';
+
+    if(secs <= 3){
+      score += 5;
+      message = '✅ Correct! +10 (Fast +5)';
+    }
+
+    if(combo % 5 === 0){
+      score += 25;
+      message += ' • Combo +25';
+    }
+
+    msgEl.textContent = message;
+    msgEl.className = 'msg good';
+  } else {
+    playWrongSound();
+    score = Math.max(0, score - 10);
+    combo = 0;
+    msgEl.textContent = '❌ Wrong! −10';
+    msgEl.className = 'msg bad';
+  }
+
+  updateHUD();
+
+  setTimeout(() => {
+    if(!ended){
+      newRectangle();
+    }
+  }, 300);
+}
+
+function saveHighScore(){
+  let highScore = Number(localStorage.getItem('game5HighScore')) || 0;
+
+  if(score > highScore){
+    localStorage.setItem('game5HighScore', score);
+    highScore = score;
+    playHighScoreSound();
+    celebrateHighScore();
+  }
+
+  return highScore;
+}
+
+function startTimer(){
+  clearInterval(timer);
+  timeLeft = 30;
+  updateHUD();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateHUD();
+
+    if(timeLeft <= 0){
+      endGame();
+    }
+  }, 1000);
+}
+
+async function endGame(){
+  if(ended) return;
+
+  ended = true;
+  gameReady = false;
+  timeLeft = 0;
+  updateHUD();
+
+  clearInterval(timer);
+  timer = null;
+
+  setInputsEnabled(false);
+
+  const highScore = saveHighScore();
+
+  try{
+    await submitScore(5, score);
+  }catch(error){
+    console.error("Submit score failed:", error);
+  }
+
+  msgEl.textContent = `⏰ Time’s up! Final Score: ${score} | High Score: ${highScore}`;
+  msgEl.className = 'msg';
+}
+
+function showCountdownOverlay(text){
+  let overlay = document.getElementById('countdownOverlay');
+
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'countdownOverlay';
+    overlay.className = 'countdown-overlay';
+    overlay.innerHTML = '<div class="countdown-text" id="countdownText"></div>';
+    gameCard.appendChild(overlay);
+  }
+
+  document.getElementById('countdownText').textContent = text;
+}
+
+function hideCountdownOverlay(){
+  const overlay = document.getElementById('countdownOverlay');
+  if(overlay) overlay.remove();
+}
+
+async function runCountdown(){
+  countdownRunning = true;
+  gameReady = false;
+  clearRectangle();
+  setInputsEnabled(false);
+  msgEl.textContent = '';
+  msgEl.className = 'msg';
+
+  const steps = ['3', '2', '1', 'Go'];
+  const durations = [700, 700, 700, 500];
+
+  for(let i = 0; i < steps.length; i++){
+    showCountdownOverlay(steps[i]);
+    await new Promise(resolve => setTimeout(resolve, durations[i]));
+  }
+
+  hideCountdownOverlay();
+  countdownRunning = false;
+}
+
+async function startSelectedDifficulty(level){
+  currentDifficulty = level;
+  mode = level;
+  started = true;
+  ended = false;
+
+  await runCountdown();
+
+  newRectangle();
+  setInputsEnabled(true);
+  gameReady = true;
+  startTimer();
+  updateHUD();
+}
+
+async function beginFromIntro(level){
+  if(countdownRunning) return;
+  initAudio();
+  introOverlay.style.display = 'none';
+  gameShell.classList.remove('blur-active');
+  await startSelectedDifficulty(level);
+}
+
+function resetRoundState(){
+  clearInterval(timer);
+  timer = null;
+  started = false;
+  ended = false;
+  mode = null;
+  timeLeft = 30;
+  score = 0;
+  combo = 0;
+  width = 0;
+  height = 0;
+  roundStart = 0;
+  countdownRunning = false;
+  gameReady = false;
+
+  hideCountdownOverlay();
+  clearRectangle();
+  ansEl.value = '';
+  msgEl.textContent = '';
+  msgEl.className = 'msg';
+  updateHUD();
+  setInputsEnabled(false);
+}
+
+ansEl.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    check();
+  }
+});
+
+function quitGame(){
+  const leave = confirm("Quit the game and go back to Home?");
+  if(leave){
+    window.location.href = "../home.html";
+  }
+}
+
+async function restartGame(){
+  const restart = confirm("Are you sure?");
+  if(!restart) return;
+
+  initAudio();
+
+  const difficultyToKeep = currentDifficulty;
+  resetRoundState();
+
+  if(difficultyToKeep){
+    introOverlay.style.display = 'none';
+    gameShell.classList.remove('blur-active');
+    await startSelectedDifficulty(difficultyToKeep);
+  } else {
+    introOverlay.style.display = 'flex';
+    gameShell.classList.add('blur-active');
+  }
+}
+
+updateHUD();
+setInputsEnabled(false);
+clearRectangle();
+</script>
+
+</body>
+</html>
