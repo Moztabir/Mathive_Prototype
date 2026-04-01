@@ -523,7 +523,7 @@
       </div>
 
       <div class="top-center">
-        <div class="top-pill">⏱ Time: <span id="time">30</span>s</div>
+        <div class="top-pill">⏱ Time: <span id="time">60</span>s</div>
         <div class="top-pill">⭐ Score: <span id="score">0</span></div>
         <div class="top-pill">🔥 Combo: <span id="combo">0</span></div>
       </div>
@@ -537,7 +537,7 @@
     <main>
       <section class="card" id="gameCard">
         <div class="play-timer-wrap">
-          <div class="play-timer">⏱ Time Left: <span id="playTime">30</span>s</div>
+          <div class="play-timer">⏱ Time Left: <span id="playTime">60</span>s</div>
         </div>
 
         <div class="hint">+10 correct • −10 wrong • +5 fast • +25 every 5 combo</div>
@@ -699,7 +699,7 @@
   let started = false;
   let ended = false;
   let mode = null;
-  let timeLeft = 30;
+  let timeLeft = 60;
   let score = 0;
   let combo = 0;
   let timer = null;
@@ -1213,7 +1213,7 @@
 
   function startTimer(){
     clearInterval(timer);
-    timeLeft = 30;
+    timeLeft = 60;
     updateHUD();
 
     timer = setInterval(() => {
@@ -1256,7 +1256,7 @@
     started = false;
     ended = false;
     mode = null;
-    timeLeft = 30;
+    timeLeft = 60;
     score = 0;
     combo = 0;
     roundStart = 0;

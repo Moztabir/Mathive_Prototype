@@ -124,16 +124,6 @@
       font-size:14px;
     }
 
-    .equation-box{
-      margin:10px auto 0;
-      width:min(100%, 560px);
-      background:#f7f7f7;
-      border-radius:18px;
-      padding:12px 14px;
-      text-align:center;
-      border:1px solid rgba(0,0,0,.05);
-    }
-
     .equation-title{
       font-size:12px;
       letter-spacing:.04em;
@@ -509,12 +499,6 @@
             <div class="shapeStage" id="shapeStage"></div>
           </div>
 
-          <div class="equation-box">
-            <div class="equation-title">Perimeter Formula</div>
-            <div class="equation-main" id="equationMain">Get ready…</div>
-            <div class="equation-sub" id="equationSub">Choose a mode to begin.</div>
-          </div>
-
           <div class="answer">
             <input id="answer" type="number" placeholder="Perimeter" disabled />
             <button class="submit" id="submitBtn" onclick="check()" disabled>✔</button>
@@ -683,8 +667,7 @@ const submitBtn = document.getElementById('submitBtn');
 const introOverlay = document.getElementById('introOverlay');
 const gameShell = document.getElementById('gameShell');
 const gameCard = document.getElementById('gameCard');
-const equationMain = document.getElementById('equationMain');
-const equationSub = document.getElementById('equationSub');
+
 
 function rand(min, max){
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -705,26 +688,11 @@ function setInputsEnabled(enabled){
   }
 }
 
-function updateEquationDisplay(){
-  if(!shapeData){
-    equationMain.textContent = 'Get ready…';
-    equationSub.textContent = 'Choose a mode to begin.';
-    return;
-  }
 
-  if(shapeData.type === 'rectangle'){
-    equationMain.textContent = `P = 2(${shapeData.width} + ${shapeData.height})`;
-    equationSub.textContent = `P = 2 × (${shapeData.width} + ${shapeData.height}) = ${shapeData.perimeter}`;
-  } else {
-    equationMain.textContent = `P = ${shapeData.sideA} + ${shapeData.sideB} + ${shapeData.sideC}`;
-    equationSub.textContent = `P = ${shapeData.perimeter}`;
-  }
-}
 
 function clearShape(){
   shapeStage.innerHTML = '';
   shapeData = null;
-  updateEquationDisplay();
 }
 
 function newShape(){
@@ -762,7 +730,6 @@ function newShape(){
     renderTriangle(sideA, sideB, sideC);
   }
 
-  updateEquationDisplay();
   ansEl.value = '';
   ansEl.focus();
   roundStart = performance.now();
@@ -1055,7 +1022,6 @@ async function restartGame(){
 
 updateHUD();
 setInputsEnabled(false);
-updateEquationDisplay();
 </script>
 </body>
 </html>

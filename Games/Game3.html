@@ -758,15 +758,21 @@
   }
 
   function updateSelectedButtons(){
-    document.querySelectorAll('.nbtn').forEach(btn => {
-      const value = Number(btn.dataset.value);
-      const selectedCount =
-        (pick1 === value ? 1 : 0) +
-        (pick2 === value ? 1 : 0);
+  document.querySelectorAll('.nbtn').forEach(btn => {
+    const value = Number(btn.dataset.value);
+    const selectedCount =
+      (pick1 === value ? 1 : 0) +
+      (pick2 === value ? 1 : 0);
 
-      btn.classList.toggle('selected', selectedCount > 0);
-    });
-  }
+    btn.classList.toggle('selected', selectedCount > 0);
+
+    if(selectedCount === 2){
+      btn.textContent = `${value} ×2`;
+    } else {
+      btn.textContent = String(value);
+    }
+  });
+}
 
   function clearSelection(){
     pick1 = null;
@@ -813,49 +819,28 @@
   }
 
   function selectNumber(n){
-    if(!started || ended || timeLeft <= 0 || !gameReady) return;
+  if(!started || ended || timeLeft <= 0 || !gameReady) return;
 
-    if(pick1 === n && pick2 === null){
-      pick1 = null;
-      updatePickDisplay();
-      updateSelectedButtons();
-      return;
-    }
-
-    if(pick2 === n){
-      pick2 = null;
-      updatePickDisplay();
-      updateSelectedButtons();
-      return;
-    }
-
-    if(pick1 === n && pick2 !== null){
-      pick1 = pick2;
-      pick2 = null;
-      updatePickDisplay();
-      updateSelectedButtons();
-      return;
-    }
-
-    if(pick1 === null){
-      pick1 = n;
-      updatePickDisplay();
-      updateSelectedButtons();
-      return;
-    }
-
-    if(pick2 === null){
-      pick2 = n;
-      updatePickDisplay();
-      updateSelectedButtons();
-      checkAnswer();
-      return;
-    }
-
+  // Fill first empty slot
+  if(pick1 === null){
     pick1 = n;
-    pick2 = null;
     updatePickDisplay();
     updateSelectedButtons();
+    return;
+  }
+
+  if(pick2 === null){
+    pick2 = n;
+    updatePickDisplay();
+    updateSelectedButtons();
+    checkAnswer();
+    return;
+  }
+
+  pick1 = n;
+  pick2 = null;
+  updatePickDisplay();
+  updateSelectedButtons();
   }
 
   function checkAnswer(){

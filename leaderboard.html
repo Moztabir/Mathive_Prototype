@@ -19,6 +19,7 @@
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:ui-rounded, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
@@ -76,6 +77,13 @@
       font-weight:1000;
       cursor:pointer;
       font-size:14px;
+      transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      box-shadow:0 8px 16px rgba(0,0,0,.06);
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(.98);
     }
 
     .btn-home{
@@ -110,6 +118,7 @@
       background:#f7f7f7;
       padding:10px 14px;
       border-radius:14px;
+      border:1px solid rgba(0,0,0,.05);
     }
 
     .podiumSection{
@@ -128,6 +137,7 @@
       text-align:center;
       overflow:hidden;
       min-height:240px;
+      isolation:isolate;
     }
 
     .podiumCard::before{
@@ -145,7 +155,21 @@
     .first{
       transform:translateY(-12px);
       animation:floatGold 2.8s ease-in-out infinite;
-      border:2px solid rgba(244,197,66,.55);
+      border:2px solid rgba(244,197,66,.7);
+      box-shadow:
+        0 18px 40px rgba(244,197,66,.18),
+        0 12px 30px rgba(0,0,0,.10);
+    }
+
+    .first::after{
+      content:"";
+      position:absolute;
+      inset:auto 18px 14px 18px;
+      height:10px;
+      border-radius:999px;
+      background:radial-gradient(circle, rgba(244,197,66,.22), transparent 70%);
+      filter:blur(8px);
+      pointer-events:none;
     }
 
     .second{
@@ -173,60 +197,130 @@
       50%{ transform:translateY(-8px) }
     }
 
+    .crownFloat{
+      position:absolute;
+      top:-18px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:42px;
+      line-height:1;
+      filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));
+      animation:crownBob 2.2s ease-in-out infinite;
+      z-index:3;
+    }
+
+    .firstGlowRing{
+      position:absolute;
+      width:110px;
+      height:110px;
+      top:14px;
+      left:50%;
+      transform:translateX(-50%);
+      border-radius:999px;
+      border:2px dashed rgba(244,197,66,.55);
+      animation:spinRing 8s linear infinite;
+      opacity:.8;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .sparkle{
+      position:absolute;
+      font-size:16px;
+      animation:sparkleFloat 2.4s ease-in-out infinite;
+      pointer-events:none;
+      opacity:.9;
+      z-index:3;
+    }
+
+    .sparkle.s1{ top:18px; left:18px; animation-delay:0s; }
+    .sparkle.s2{ top:26px; right:20px; animation-delay:.8s; }
+    .sparkle.s3{ top:66px; right:46px; animation-delay:1.4s; }
+
+    @keyframes crownBob{
+      0%,100%{ transform:translateX(-50%) translateY(0); }
+      50%{ transform:translateX(-50%) translateY(-8px); }
+    }
+
+    @keyframes spinRing{
+      from{ transform:translateX(-50%) rotate(0deg); }
+      to{ transform:translateX(-50%) rotate(360deg); }
+    }
+
+    @keyframes sparkleFloat{
+      0%,100%{ transform:translateY(0) scale(1); opacity:.85; }
+      50%{ transform:translateY(-8px) scale(1.12); opacity:1; }
+    }
+
     .rankBadge{
-      width:58px;
-      height:58px;
-      margin:0 auto 10px;
+      width:62px;
+      height:62px;
+      margin:0 auto 12px;
       border-radius:999px;
       display:grid;
       place-items:center;
-      font-size:24px;
+      font-size:25px;
       font-weight:1000;
       color:#1b1b1b;
-      box-shadow:0 8px 18px rgba(0,0,0,.10);
+      box-shadow:0 10px 20px rgba(0,0,0,.12);
+      position:relative;
+      z-index:2;
     }
 
-    .rank1{ background:var(--gold); }
+    .rank1{
+      background:linear-gradient(180deg, #ffe27a 0%, var(--gold) 100%);
+    }
+
     .rank2{ background:var(--silver); }
     .rank3{ background:var(--bronze); color:#fff; }
 
     .playerName{
-      font-size:22px;
+      font-size:24px;
       font-weight:1000;
-      margin-top:6px;
+      margin-top:8px;
+      position:relative;
+      z-index:2;
     }
 
     .playerClass{
       color:var(--muted);
       font-size:14px;
       margin-top:4px;
+      position:relative;
+      z-index:2;
     }
 
     .totalScore{
       margin-top:14px;
-      font-size:32px;
+      font-size:36px;
       font-weight:1000;
+      position:relative;
+      z-index:2;
     }
 
     .totalLabel{
       color:var(--muted);
       font-size:13px;
       font-weight:900;
+      position:relative;
+      z-index:2;
     }
 
-    .gameBreakdown{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:8px;
-    }
-
-    .mini{
-      background:#f7f7f7;
-      border-radius:12px;
-      padding:8px 4px;
+    .scoreChip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      margin-top:12px;
+      background:#fff8dc;
+      color:#7a5a00;
+      border:1px solid rgba(244,197,66,.45);
+      border-radius:999px;
+      padding:8px 12px;
       font-size:12px;
-      font-weight:900;
+      font-weight:1000;
+      position:relative;
+      z-index:2;
     }
 
     .tableCard{
@@ -265,12 +359,23 @@
       background:#fcfcfc;
     }
 
+    tr.meRow td{
+      background:#fffbea;
+    }
+
     .rankCell{
       font-weight:1000;
-      width:70px;
+      width:90px;
     }
 
     .nameCell{
+      font-weight:1000;
+    }
+
+    .medal{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
       font-weight:1000;
     }
 
@@ -298,6 +403,12 @@
       .second,
       .third{
         transform:none;
+        animation:none;
+      }
+
+      .crownFloat,
+      .firstGlowRing,
+      .sparkle{
         animation:none;
       }
     }
@@ -349,222 +460,233 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+  <script src="js/supabase.js"></script>
 
-<script>
-  function getDisplayName(player){
-    if(player?.nickname && player.nickname.trim()) return player.nickname.trim();
-    if(player?.full_name && player.full_name.trim()) return player.full_name.trim();
-    return "Unknown Player";
-  }
+  <script>
+    function getDisplayName(player){
+      if(player?.nickname && player.nickname.trim()) return player.nickname.trim();
+      if(player?.full_name && player.full_name.trim()) return player.full_name.trim();
+      return "Unknown Player";
+    }
 
-  function groupBestScores(rows){
-    const players = {};
+    function groupBestScores(rows){
+      const players = {};
 
-    rows.forEach(row => {
-      const player = row.players;
-      if(!player) return;
+      rows.forEach(row => {
+        const player = row.players;
+        if(!player) return;
 
-      const id = row.player_id;
+        const id = row.player_id;
 
-      if(!players[id]){
-        players[id] = {
-          player_id: id,
-          full_name: player.full_name || "",
-          nickname: player.nickname || "",
-          class_code: player.class_code || "—",
-          game1: 0,
-          game2: 0,
-          game3: 0,
-          game4: 0,
-          game5: 0,
-          total: 0
-        };
+        if(!players[id]){
+          players[id] = {
+            player_id: id,
+            full_name: player.full_name || "",
+            nickname: player.nickname || "",
+            class_code: player.class_code || "—",
+            game1: 0,
+            game2: 0,
+            game3: 0,
+            game4: 0,
+            game5: 0,
+            total: 0
+          };
+        }
+
+        const score = Number(row.score) || 0;
+        const game = Number(row.game_number);
+
+        if(game === 1) players[id].game1 = Math.max(players[id].game1, score);
+        if(game === 2) players[id].game2 = Math.max(players[id].game2, score);
+        if(game === 3) players[id].game3 = Math.max(players[id].game3, score);
+        if(game === 4) players[id].game4 = Math.max(players[id].game4, score);
+        if(game === 5) players[id].game5 = Math.max(players[id].game5, score);
+      });
+
+      const list = Object.values(players).map(p => {
+        p.total = p.game1 + p.game2 + p.game3 + p.game4 + p.game5;
+        return p;
+      });
+
+      list.sort((a, b) => {
+        if(b.total !== a.total) return b.total - a.total;
+        return getDisplayName(a).localeCompare(getDisplayName(b));
+      });
+
+      list.forEach((p, index) => {
+        p.rank = index + 1;
+      });
+
+      return list;
+    }
+
+    function renderPodium(players){
+      const podium = document.getElementById("podiumSection");
+
+      if(!players.length){
+        podium.innerHTML = `<div class="empty" style="grid-column:1/-1;">No scores yet.</div>`;
+        return;
       }
 
-      const score = Number(row.score) || 0;
-      const game = Number(row.game_number);
+      const second = players[1];
+      const first = players[0];
+      const third = players[2];
 
-      if(game === 1) players[id].game1 = Math.max(players[id].game1, score);
-      if(game === 2) players[id].game2 = Math.max(players[id].game2, score);
-      if(game === 3) players[id].game3 = Math.max(players[id].game3, score);
-      if(game === 4) players[id].game4 = Math.max(players[id].game4, score);
-      if(game === 5) players[id].game5 = Math.max(players[id].game5, score);
-    });
+      const cards = [];
 
-    const list = Object.values(players).map(p => {
-      p.total = p.game1 + p.game2 + p.game3 + p.game4 + p.game5;
-      return p;
-    });
-
-    list.sort((a, b) => {
-      if(b.total !== a.total) return b.total - a.total;
-      return getDisplayName(a).localeCompare(getDisplayName(b));
-    });
-
-    list.forEach((p, index) => {
-      p.rank = index + 1;
-    });
-
-    return list;
-  }
-
-  function renderPodium(players){
-    const podium = document.getElementById("podiumSection");
-
-    if(!players.length){
-      podium.innerHTML = `<div class="empty" style="grid-column:1/-1;">No scores yet.</div>`;
-      return;
-    }
-
-    const second = players[1];
-    const first = players[0];
-    const third = players[2];
-
-    const cards = [];
-
-    if(second){
-      cards.push(`
-        <div class="podiumCard second">
-          <div class="rankBadge rank2">2</div>
-          <div class="playerName">${getDisplayName(second)}</div>
-          <div class="playerClass">Class ${second.class_code}</div>
-          <div class="totalScore">${second.total}</div>
-          <div class="totalLabel">Total Score</div>
-        </div>
-      `);
-    } else {
-      cards.push(`<div></div>`);
-    }
-
-    if(first){
-      cards.push(`
-        <div class="podiumCard first">
-          <div class="rankBadge rank1">1</div>
-          <div class="playerName">${getDisplayName(first)}</div>
-          <div class="playerClass">Class ${first.class_code}</div>
-          <div class="totalScore">${first.total}</div>
-          <div class="totalLabel">Total Score</div>
-        </div>
-      `);
-    } else {
-      cards.push(`<div></div>`);
-    }
-
-    if(third){
-      cards.push(`
-        <div class="podiumCard third">
-          <div class="rankBadge rank3">3</div>
-          <div class="playerName">${getDisplayName(third)}</div>
-          <div class="playerClass">Class ${third.class_code}</div>
-          <div class="totalScore">${third.total}</div>
-          <div class="totalLabel">Total Score</div>
-        </div>
-      `);
-    } else {
-      cards.push(`<div></div>`);
-    }
-
-    podium.innerHTML = cards.join("");
-  }
-
-  function renderTable(players){
-    const tbody = document.getElementById("leaderboardBody");
-
-    if(!players.length){
-      tbody.innerHTML = `<tr><td colspan="9">No scores yet.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = players.map(player => `
-      <tr>
-        <td>#${player.rank}</td>
-        <td>${getDisplayName(player)}</td>
-        <td>${player.class_code}</td>
-        <td><strong>${player.total}</strong></td>
-        <td>${player.game1}</td>
-        <td>${player.game2}</td>
-        <td>${player.game3}</td>
-        <td>${player.game4}</td>
-        <td>${player.game5}</td>
-      </tr>
-    `).join("");
-  }
-
-  function renderMyRank(players){
-    const myId = localStorage.getItem("mq_player_id");
-    const box = document.getElementById("myRankBox");
-
-    if(!myId){
-      box.textContent = "Your rank: —";
-      return;
-    }
-
-    const me = players.find(p => p.player_id === myId);
-
-    if(!me){
-      box.textContent = "Your rank: Not ranked yet";
-      return;
-    }
-
-    box.textContent = `Your rank: #${me.rank} • Total ${me.total}`;
-  }
-
-  async function loadLeaderboard(){
-    const statusText = document.getElementById("statusText");
-    const tbody = document.getElementById("leaderboardBody");
-    const podium = document.getElementById("podiumSection");
-
-    statusText.textContent = "Loading leaderboard...";
-    tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
-    podium.innerHTML = "";
-
-    try{
-      if(typeof supabaseClient === "undefined"){
-        throw new Error("supabaseClient is not defined. Check script order and js/supabase.js path.");
+      if(second){
+        cards.push(`
+          <div class="podiumCard second">
+            <div class="rankBadge rank2">2</div>
+            <div class="playerName">${getDisplayName(second)}</div>
+            <div class="playerClass">Class ${second.class_code}</div>
+            <div class="totalScore">${second.total}</div>
+            <div class="totalLabel">Total Score</div>
+          </div>
+        `);
+      } else {
+        cards.push(`<div></div>`);
       }
 
-      console.log("Leaderboard: supabaseClient loaded", supabaseClient);
+      if(first){
+        cards.push(`
+          <div class="podiumCard first">
+            <div class="crownFloat">👑</div>
+            <div class="firstGlowRing"></div>
+            <div class="sparkle s1">✨</div>
+            <div class="sparkle s2">⭐</div>
+            <div class="sparkle s3">✨</div>
 
-      const { data, error } = await supabaseClient
-        .from("score_attempts")
-        .select(`
-          player_id,
-          game_number,
-          score,
-          submitted_at,
-          players (
-            full_name,
-            nickname,
-            class_code
-          )
-        `)
-        .order("submitted_at", { ascending: false });
-
-      console.log("Leaderboard raw data:", data);
-      console.log("Leaderboard raw error:", error);
-
-      if(error){
-        throw error;
+            <div class="rankBadge rank1">1</div>
+            <div class="playerName">${getDisplayName(first)}</div>
+            <div class="playerClass">Class ${first.class_code}</div>
+            <div class="totalScore">${first.total}</div>
+            <div class="totalLabel">Total Score</div>
+            <div class="scoreChip">🏆 Top Player</div>
+          </div>
+        `);
+      } else {
+        cards.push(`<div></div>`);
       }
 
-      const rankedPlayers = groupBestScores(data || []);
+      if(third){
+        cards.push(`
+          <div class="podiumCard third">
+            <div class="rankBadge rank3">3</div>
+            <div class="playerName">${getDisplayName(third)}</div>
+            <div class="playerClass">Class ${third.class_code}</div>
+            <div class="totalScore">${third.total}</div>
+            <div class="totalLabel">Total Score</div>
+          </div>
+        `);
+      } else {
+        cards.push(`<div></div>`);
+      }
 
-      statusText.textContent = `Showing ${rankedPlayers.length} ranked player${rankedPlayers.length === 1 ? "" : "s"}.`;
-
-      renderPodium(rankedPlayers);
-      renderTable(rankedPlayers);
-      renderMyRank(rankedPlayers);
-    }catch(err){
-      console.error("Leaderboard failed:", err);
-      statusText.textContent = "Could not load leaderboard.";
-      tbody.innerHTML = `<tr><td colspan="9">Error: ${err.message}</td></tr>`;
-      podium.innerHTML = `<div class="empty" style="grid-column:1/-1;">Could not load podium.</div>`;
+      podium.innerHTML = cards.join("");
     }
-  }
 
-  loadLeaderboard();
-</script>
+    function getRankDisplay(rank){
+      if(rank === 1) return `<span class="medal">🥇 #1</span>`;
+      if(rank === 2) return `<span class="medal">🥈 #2</span>`;
+      if(rank === 3) return `<span class="medal">🥉 #3</span>`;
+      return `#${rank}`;
+    }
+
+    function renderTable(players){
+      const tbody = document.getElementById("leaderboardBody");
+      const myId = localStorage.getItem("mq_player_id");
+
+      if(!players.length){
+        tbody.innerHTML = `<tr><td colspan="9">No scores yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = players.map(player => `
+        <tr class="${player.player_id === myId ? 'meRow' : ''}">
+          <td class="rankCell">${getRankDisplay(player.rank)}</td>
+          <td class="nameCell">${getDisplayName(player)}</td>
+          <td>${player.class_code}</td>
+          <td><strong>${player.total}</strong></td>
+          <td>${player.game1}</td>
+          <td>${player.game2}</td>
+          <td>${player.game3}</td>
+          <td>${player.game4}</td>
+          <td>${player.game5}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderMyRank(players){
+      const myId = localStorage.getItem("mq_player_id");
+      const box = document.getElementById("myRankBox");
+
+      if(!myId){
+        box.textContent = "Your rank: —";
+        return;
+      }
+
+      const me = players.find(p => p.player_id === myId);
+
+      if(!me){
+        box.textContent = "Your rank: Not ranked yet";
+        return;
+      }
+
+      const medal = me.rank === 1 ? "🥇 " : me.rank === 2 ? "🥈 " : me.rank === 3 ? "🥉 " : "";
+      box.textContent = `${medal}Your rank: #${me.rank} • Total ${me.total}`;
+    }
+
+    async function loadLeaderboard(){
+      const statusText = document.getElementById("statusText");
+      const tbody = document.getElementById("leaderboardBody");
+      const podium = document.getElementById("podiumSection");
+
+      statusText.textContent = "Loading leaderboard...";
+      tbody.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
+      podium.innerHTML = "";
+
+      try{
+        if(typeof supabaseClient === "undefined"){
+          throw new Error("supabaseClient is not defined. Check script order and js/supabase.js path.");
+        }
+
+        const { data, error } = await supabaseClient
+          .from("score_attempts")
+          .select(`
+            player_id,
+            game_number,
+            score,
+            submitted_at,
+            players (
+              full_name,
+              nickname,
+              class_code
+            )
+          `)
+          .order("submitted_at", { ascending: false });
+
+        if(error){
+          throw error;
+        }
+
+        const rankedPlayers = groupBestScores(data || []);
+
+        statusText.textContent = `Showing ${rankedPlayers.length} ranked player${rankedPlayers.length === 1 ? "" : "s"}.`;
+
+        renderPodium(rankedPlayers);
+        renderTable(rankedPlayers);
+        renderMyRank(rankedPlayers);
+      }catch(err){
+        console.error("Leaderboard failed:", err);
+        statusText.textContent = "Could not load leaderboard.";
+        tbody.innerHTML = `<tr><td colspan="9">Error: ${err.message}</td></tr>`;
+        podium.innerHTML = `<div class="empty" style="grid-column:1/-1;">Could not load podium.</div>`;
+      }
+    }
+
+    loadLeaderboard();
+  </script>
 
 </body>
 </html>
