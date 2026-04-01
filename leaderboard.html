@@ -126,6 +126,8 @@
       grid-template-columns:repeat(3,1fr);
       gap:16px;
       align-items:end;
+      padding-top:32px;
+      overflow:visible;
     }
 
     .podiumCard{
@@ -133,9 +135,9 @@
       background:var(--card);
       border-radius:24px;
       box-shadow:var(--shadow);
-      padding:18px 16px;
+      padding:18px 16px 20px;
       text-align:center;
-      overflow:hidden;
+      overflow:visible;
       min-height:240px;
       isolation:isolate;
     }
@@ -146,6 +148,8 @@
       inset:0;
       opacity:.18;
       pointer-events:none;
+      border-radius:24px;
+      z-index:0;
     }
 
     .first::before{ background:linear-gradient(180deg,var(--gold),transparent 70%); }
@@ -170,6 +174,7 @@
       background:radial-gradient(circle, rgba(244,197,66,.22), transparent 70%);
       filter:blur(8px);
       pointer-events:none;
+      z-index:0;
     }
 
     .second{
@@ -199,14 +204,15 @@
 
     .crownFloat{
       position:absolute;
-      top:-18px;
+      top:-30px;
       left:50%;
       transform:translateX(-50%);
-      font-size:42px;
+      font-size:44px;
       line-height:1;
       filter:drop-shadow(0 8px 12px rgba(0,0,0,.18));
       animation:crownBob 2.2s ease-in-out infinite;
-      z-index:3;
+      z-index:4;
+      pointer-events:none;
     }
 
     .firstGlowRing{
@@ -233,9 +239,9 @@
       z-index:3;
     }
 
-    .sparkle.s1{ top:18px; left:18px; animation-delay:0s; }
+    .sparkle.s1{ top:16px; left:18px; animation-delay:0s; }
     .sparkle.s2{ top:26px; right:20px; animation-delay:.8s; }
-    .sparkle.s3{ top:66px; right:46px; animation-delay:1.4s; }
+    .sparkle.s3{ top:64px; right:46px; animation-delay:1.4s; }
 
     @keyframes crownBob{
       0%,100%{ transform:translateX(-50%) translateY(0); }
@@ -397,6 +403,7 @@
     @media (max-width:900px){
       .podiumSection{
         grid-template-columns:1fr;
+        padding-top:0;
       }
 
       .first,
@@ -410,6 +417,10 @@
       .firstGlowRing,
       .sparkle{
         animation:none;
+      }
+
+      .crownFloat{
+        top:-22px;
       }
     }
   </style>
@@ -687,6 +698,5 @@
 
     loadLeaderboard();
   </script>
-
 </body>
 </html>
