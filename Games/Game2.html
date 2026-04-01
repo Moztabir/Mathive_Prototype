@@ -198,6 +198,13 @@
       min-height:300px;
     }
 
+    .choiceBtn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:64px;
+}
+
     .yAxis{
       height:260px;
       display:flex;
@@ -597,6 +604,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../js/supabase.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.js"></script>
+
 <script>
   let audioStarted = false;
 
@@ -797,290 +808,113 @@
     await runCountdown();
 
     graphBox.style.display = 'block';
+    gameReady = true;
     newRound();
     startTimer();
-    gameReady = true;
     updateHUD();
   }
 
-  function newRound(){
-    if(ended || !mode) return;
+  function getTiedLabels(data, modeType){
+    if(modeType === 'max'){
+      const max = Math.max(...data.map(d => d.value));
+      return data.filter(d => d.value === max).map(d => d.label);
+    }
 
-    const theme = themes[rand(0, themes.length - 1)];
+    if(modeType === 'min'){
+      const min = Math.min(...data.map(d => d.value));
+      return data.filter(d => d.value === min).map(d => d.label);
+    }
 
-    const data = theme.labels.map(label => ({
-      label,
-      value: mode === 'easy' ? rand(1, 10) : rand(2, 15)
-    }));
-
-    currentRound = buildQuestion(theme.title, data);
-    renderRound(currentRound);
-    roundStart = performance.now();
-
-    msgEl.textContent = '';
-    msgEl.className = 'msg';
+    return [];
   }
 
-  function buildQuestion(title, data){
-    const sortedHigh = [...data].sort((a, b) => b.value - a.value);
-    const sortedLow = [...data].sort((a, b) => a.value - b.value);
+  function getSecondPlaceLabels(data, modeType){
+    const values = [...new Set(data.map(d => d.value))];
 
-    const maxItem = sortedHigh[0];
-    const secondMax = sortedHigh[1];
-    const minItem = sortedLow[0];
-    const secondMin = sortedLow[1];
+    if(values.length < 2){
+      return data.map(d => d.label);
+    }
 
-    const totalAll = data.reduce((sum, item) => sum + item.value, 0);
+    if(modeType === 'secondMax'){
+      values.sort((a, b) => b - a);
+      const secondValue = values[1];
+      return data.filter(d => d.value === secondValue).map(d => d.label);
+    }
 
-    const i1 = rand(0, data.length - 1);
-    let i2 = rand(0, data.length - 1);
-    while(i2 === i1) i2 = rand(0, data.length - 1);
+    if(modeType === 'secondMin'){
+      values.sort((a, b) => a - b);
+      const secondValue = values[1];
+      return data.filter(d => d.value === secondValue).map(d => d.label);
+    }
 
-    let i3 = rand(0, data.length - 1);
-    while(i3 === i1 || i3 === i2) i3 = rand(0, data.length - 1);
-
-    const a = data[i1];
-    const b = data[i2];
-    const c = data[i3];
-
-    const easyQuestions = [
-      {
-        text: `Which category has the greatest number?`,
-        answer: maxItem.label,
-        options: shuffleUnique([
-          maxItem.label,
-          ...pickOtherLabels(data, maxItem.label, 3)
-        ])
-      },
-      {
-        text: `Which category has the least number?`,
-        answer: minItem.label,
-        options: shuffleUnique([
-          minItem.label,
-          ...pickOtherLabels(data, minItem.label, 3)
-        ])
-      },
-      {
-        text: `How many chose ${a.label}?`,
-        answer: String(a.value),
-        options: buildNumberOptions(a.value)
-      },
-      {
-        text: `How many chose ${b.label}?`,
-        answer: String(b.value),
-        options: buildNumberOptions(b.value)
-      },
-      {
-        text: `How many chose ${c.label}?`,
-        answer: String(c.value),
-        options: buildNumberOptions(c.value)
-      },
-      {
-        text: `Which category has more: ${a.label} or ${b.label}?`,
-        answer: a.value >= b.value ? a.label : b.label,
-        options: shuffleUnique([
-          a.label,
-          b.label,
-          ...pickOtherLabels(data, "", 2)
-        ])
-      },
-      {
-        text: `Which category has fewer: ${a.label} or ${b.label}?`,
-        answer: a.value <= b.value ? a.label : b.label,
-        options: shuffleUnique([
-          a.label,
-          b.label,
-          ...pickOtherLabels(data, "", 2)
-        ])
-      },
-      {
-        text: `How many more chose ${maxItem.label} than ${minItem.label}?`,
-        answer: String(maxItem.value - minItem.value),
-        options: buildNumberOptions(maxItem.value - minItem.value)
-      },
-      {
-        text: `How many chose ${a.label} and ${b.label} altogether?`,
-        answer: String(a.value + b.value),
-        options: buildNumberOptions(a.value + b.value)
-      },
-      {
-        text: `How many chose ${b.label} and ${c.label} altogether?`,
-        answer: String(b.value + c.value),
-        options: buildNumberOptions(b.value + c.value)
-      },
-      {
-        text: `What is the total for all categories?`,
-        answer: String(totalAll),
-        options: buildNumberOptions(totalAll)
-      },
-      {
-        text: `Which category is second greatest?`,
-        answer: secondMax.label,
-        options: shuffleUnique([
-          secondMax.label,
-          maxItem.label,
-          minItem.label,
-          secondMin.label
-        ])
-      },
-      {
-        text: `Which category is second least?`,
-        answer: secondMin.label,
-        options: shuffleUnique([
-          secondMin.label,
-          minItem.label,
-          maxItem.label,
-          secondMax.label
-        ])
-      },
-      {
-        text: `How many fewer chose ${minItem.label} than ${maxItem.label}?`,
-        answer: String(maxItem.value - minItem.value),
-        options: buildNumberOptions(maxItem.value - minItem.value)
-      },
-      {
-        text: `Which two categories together make the greatest total?`,
-        answer: `${maxItem.label} + ${secondMax.label}`,
-        options: shuffleUnique([
-          `${maxItem.label} + ${secondMax.label}`,
-          `${minItem.label} + ${secondMin.label}`,
-          `${a.label} + ${b.label}`,
-          `${b.label} + ${c.label}`
-        ])
-      }
-    ];
-
-    const hardQuestions = [
-      {
-        text: `How many more chose ${a.label} than ${b.label}?`,
-        answer: String(Math.max(0, a.value - b.value)),
-        options: buildNumberOptions(Math.max(0, a.value - b.value))
-      },
-      {
-        text: `How many more chose ${b.label} than ${a.label}?`,
-        answer: String(Math.max(0, b.value - a.value)),
-        options: buildNumberOptions(Math.max(0, b.value - a.value))
-      },
-      {
-        text: `How many chose ${a.label} and ${b.label} altogether?`,
-        answer: String(a.value + b.value),
-        options: buildNumberOptions(a.value + b.value)
-      },
-      {
-        text: `How many chose ${a.label}, ${b.label}, and ${c.label} altogether?`,
-        answer: String(a.value + b.value + c.value),
-        options: buildNumberOptions(a.value + b.value + c.value)
-      },
-      {
-        text: `What is the total for all categories?`,
-        answer: String(totalAll),
-        options: buildNumberOptions(totalAll)
-      },
-      {
-        text: `If 2 more students chose ${a.label}, what would the new total be?`,
-        answer: String(a.value + 2),
-        options: buildNumberOptions(a.value + 2)
-      },
-      {
-        text: `If 3 more students chose ${b.label}, what would the new total be?`,
-        answer: String(b.value + 3),
-        options: buildNumberOptions(b.value + 3)
-      },
-      {
-        text: `If 2 students were taken away from ${c.label}, what would the new total be?`,
-        answer: String(Math.max(0, c.value - 2)),
-        options: buildNumberOptions(Math.max(0, c.value - 2))
-      },
-      {
-        text: `How many more students are needed for ${minItem.label} to match ${maxItem.label}?`,
-        answer: String(maxItem.value - minItem.value),
-        options: buildNumberOptions(maxItem.value - minItem.value)
-      },
-      {
-        text: `Which category has the greatest number?`,
-        answer: maxItem.label,
-        options: shuffleUnique([
-          maxItem.label,
-          ...pickOtherLabels(data, maxItem.label, 3)
-        ])
-      },
-      {
-        text: `Which category has the least number?`,
-        answer: minItem.label,
-        options: shuffleUnique([
-          minItem.label,
-          ...pickOtherLabels(data, minItem.label, 3)
-        ])
-      },
-      {
-        text: `Which category is second greatest?`,
-        answer: secondMax.label,
-        options: shuffleUnique([
-          secondMax.label,
-          maxItem.label,
-          minItem.label,
-          secondMin.label
-        ])
-      },
-      {
-        text: `Which category is second least?`,
-        answer: secondMin.label,
-        options: shuffleUnique([
-          secondMin.label,
-          minItem.label,
-          maxItem.label,
-          secondMax.label
-        ])
-      },
-      {
-        text: `How many more chose ${maxItem.label} and ${secondMax.label} together than ${minItem.label} and ${secondMin.label} together?`,
-        answer: String((maxItem.value + secondMax.value) - (minItem.value + secondMin.value)),
-        options: buildNumberOptions((maxItem.value + secondMax.value) - (minItem.value + secondMin.value))
-      },
-      {
-        text: `Which two categories together make the least total?`,
-        answer: `${minItem.label} + ${secondMin.label}`,
-        options: shuffleUnique([
-          `${minItem.label} + ${secondMin.label}`,
-          `${maxItem.label} + ${secondMax.label}`,
-          `${a.label} + ${b.label}`,
-          `${b.label} + ${c.label}`
-        ])
-      }
-    ];
-
-    const questionPool = mode === 'easy' ? easyQuestions : hardQuestions;
-    const picked = questionPool[rand(0, questionPool.length - 1)];
-
-    return {
-      title,
-      data,
-      question: picked.text,
-      answer: picked.answer,
-      options: picked.options
-    };
+    return [];
   }
 
-  function pickOtherLabels(data, exclude, count){
+  function makePairLabel(a, b){
+    return [a, b].sort().join(' + ');
+  }
+
+  function getAllPairTotals(data){
+    const pairs = [];
+    for(let i = 0; i < data.length; i++){
+      for(let j = i + 1; j < data.length; j++){
+        pairs.push({
+          label: makePairLabel(data[i].label, data[j].label),
+          total: data[i].value + data[j].value
+        });
+      }
+    }
+    return pairs;
+  }
+
+  function buildPairQuestion(data, modeType){
+    const pairs = getAllPairTotals(data);
+    const totals = pairs.map(p => p.total);
+
+    let target;
+    if(modeType === 'max'){
+      target = Math.max(...totals);
+    } else {
+      target = Math.min(...totals);
+    }
+
+    const correctPairs = pairs.filter(p => p.total === target).map(p => p.label);
+    const wrongPairs = pairs.filter(p => p.total !== target).map(p => p.label);
+
+    const options = shuffleUnique([
+      ...correctPairs,
+      ...wrongPairs.slice(0, Math.max(0, 4 - correctPairs.length))
+    ]);
+
+    return { correctAnswers: correctPairs, options };
+  }
+
+  function pickOtherLabels(data, excludeList = [], count = 3){
+    const excludeSet = new Set(Array.isArray(excludeList) ? excludeList : [excludeList]);
+
     const others = data
-      .filter(item => !exclude || item.label !== exclude)
+      .filter(item => !excludeSet.has(item.label))
       .map(item => item.label);
 
-    return others.slice(0, count);
+    const shuffled = [...others];
+    for(let i = shuffled.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled.slice(0, count);
   }
 
   function shuffleUnique(arr){
     const unique = [...new Set(arr)];
-    while(unique.length < 4){
-      unique.push(unique[unique.length - 1] || "0");
-    }
+    const shuffled = [...unique];
 
-    for(let i = unique.length - 1; i > 0; i--){
+    for(let i = shuffled.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
-      [unique[i], unique[j]] = [unique[j], unique[i]];
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
 
-    return unique.slice(0, 4);
+    return shuffled.slice(0, 4);
   }
 
   function buildNumberOptions(correct){
@@ -1109,6 +943,123 @@
     return colors[index % colors.length];
   }
 
+  function makeLabelQuestion(text, correctLabels, data){
+    const safeCorrect = [...new Set(correctLabels)];
+    const options = shuffleUnique([
+      ...safeCorrect,
+      ...pickOtherLabels(data, safeCorrect, 4 - safeCorrect.length)
+    ]);
+
+    return {
+      text,
+      correctAnswers: safeCorrect,
+      options
+    };
+  }
+
+  function makeNumberQuestion(text, correctNumber){
+    return {
+      text,
+      correctAnswers: [String(correctNumber)],
+      options: buildNumberOptions(correctNumber)
+    };
+  }
+
+  function buildQuestion(title, data){
+    const sortedHigh = [...data].sort((a, b) => b.value - a.value);
+    const sortedLow = [...data].sort((a, b) => a.value - b.value);
+
+    const maxItem = sortedHigh[0];
+    const minItem = sortedLow[0];
+    const totalAll = data.reduce((sum, item) => sum + item.value, 0);
+
+    const maxLabels = getTiedLabels(data, 'max');
+    const minLabels = getTiedLabels(data, 'min');
+    const secondGreatestLabels = getSecondPlaceLabels(data, 'secondMax');
+    const secondLeastLabels = getSecondPlaceLabels(data, 'secondMin');
+
+    const i1 = rand(0, data.length - 1);
+    let i2 = rand(0, data.length - 1);
+    while(i2 === i1) i2 = rand(0, data.length - 1);
+
+    let i3 = rand(0, data.length - 1);
+    while(i3 === i1 || i3 === i2) i3 = rand(0, data.length - 1);
+
+    const a = data[i1];
+    const b = data[i2];
+    const c = data[i3];
+
+    const easyQuestions = [
+      makeLabelQuestion(`Which category has the greatest number?`, maxLabels, data),
+      makeLabelQuestion(`Which category has the least number?`, minLabels, data),
+      makeNumberQuestion(`How many chose ${a.label}?`, a.value),
+      makeNumberQuestion(`How many chose ${b.label}?`, b.value),
+      makeNumberQuestion(`How many chose ${c.label}?`, c.value),
+      makeLabelQuestion(
+        `Which category has more: ${a.label} or ${b.label}?`,
+        a.value > b.value ? [a.label] : b.value > a.value ? [b.label] : [a.label, b.label],
+        data
+      ),
+      makeLabelQuestion(
+        `Which category has fewer: ${a.label} or ${b.label}?`,
+        a.value < b.value ? [a.label] : b.value < a.value ? [b.label] : [a.label, b.label],
+        data
+      ),
+      makeNumberQuestion(`How many more chose ${maxItem.label} than ${minItem.label}?`, maxItem.value - minItem.value),
+      makeNumberQuestion(`How many chose ${a.label} and ${b.label} altogether?`, a.value + b.value),
+      makeNumberQuestion(`How many chose ${b.label} and ${c.label} altogether?`, b.value + c.value),
+      makeNumberQuestion(`What is the total for all categories?`, totalAll),
+      makeLabelQuestion(`Which category is second greatest?`, secondGreatestLabels, data),
+      makeLabelQuestion(`Which category is second least?`, secondLeastLabels, data),
+      makeNumberQuestion(`How many fewer chose ${minItem.label} than ${maxItem.label}?`, maxItem.value - minItem.value)
+    ];
+
+    const greatestPair = buildPairQuestion(data, 'max');
+    easyQuestions.push({
+      text: `Which two categories together make the greatest total?`,
+      correctAnswers: greatestPair.correctAnswers,
+      options: greatestPair.options
+    });
+
+    const hardQuestions = [
+      makeNumberQuestion(`How many more chose ${a.label} than ${b.label}?`, Math.max(0, a.value - b.value)),
+      makeNumberQuestion(`How many more chose ${b.label} than ${a.label}?`, Math.max(0, b.value - a.value)),
+      makeNumberQuestion(`How many chose ${a.label} and ${b.label} altogether?`, a.value + b.value),
+      makeNumberQuestion(`How many chose ${a.label}, ${b.label}, and ${c.label} altogether?`, a.value + b.value + c.value),
+      makeNumberQuestion(`What is the total for all categories?`, totalAll),
+      makeNumberQuestion(`If 2 more students chose ${a.label}, what would the new total be?`, a.value + 2),
+      makeNumberQuestion(`If 3 more students chose ${b.label}, what would the new total be?`, b.value + 3),
+      makeNumberQuestion(`If 2 students were taken away from ${c.label}, what would the new total be?`, Math.max(0, c.value - 2)),
+      makeNumberQuestion(`How many more students are needed for ${minItem.label} to match ${maxItem.label}?`, maxItem.value - minItem.value),
+      makeLabelQuestion(`Which category has the greatest number?`, maxLabels, data),
+      makeLabelQuestion(`Which category has the least number?`, minLabels, data),
+      makeLabelQuestion(`Which category is second greatest?`, secondGreatestLabels, data),
+      makeLabelQuestion(`Which category is second least?`, secondLeastLabels, data),
+      makeNumberQuestion(
+        `How many more chose ${maxItem.label} and ${secondGreatestLabels[0]} together than ${minItem.label} and ${secondLeastLabels[0]} together?`,
+        ((maxItem.value + (data.find(d => d.label === secondGreatestLabels[0])?.value || 0)) - (minItem.value + (data.find(d => d.label === secondLeastLabels[0])?.value || 0)))
+      )
+    ];
+
+    const leastPair = buildPairQuestion(data, 'min');
+    hardQuestions.push({
+      text: `Which two categories together make the least total?`,
+      correctAnswers: leastPair.correctAnswers,
+      options: leastPair.options
+    });
+
+    const questionPool = mode === 'easy' ? easyQuestions : hardQuestions;
+    const picked = questionPool[rand(0, questionPool.length - 1)];
+
+    return {
+      title,
+      data,
+      question: picked.text,
+      correctAnswers: picked.correctAnswers,
+      options: picked.options
+    };
+  }
+
   function renderRound(round){
     graphTitle.textContent = round.title;
     questionText.textContent = round.question;
@@ -1118,9 +1069,15 @@
     bars.innerHTML = '';
     choices.innerHTML = '';
 
-    for(let i = maxValue; i >= 0; i -= Math.max(1, Math.ceil(maxValue / 5))){
+    const step = Math.max(1, Math.ceil(maxValue / 5));
+    for(let i = maxValue; i >= 0; i -= step){
       const tick = document.createElement('div');
       tick.textContent = i;
+      yAxis.appendChild(tick);
+    }
+    if(Number(yAxis.lastChild?.textContent) !== 0){
+      const tick = document.createElement('div');
+      tick.textContent = 0;
       yAxis.appendChild(tick);
     }
 
@@ -1150,7 +1107,19 @@
     round.options.forEach(option => {
       const btn = document.createElement('button');
       btn.className = 'choiceBtn';
-      btn.textContent = option;
+
+      if(round.title === 'Favourite Colours' && ['Blue','Red','Green','Yellow'].includes(option)){
+        const swatchColor = getBarColor(round.title, option, 0);
+        btn.innerHTML = `
+          <span style="display:inline-flex;align-items:center;gap:10px;justify-content:center;">
+            <span style="width:16px;height:16px;border-radius:999px;background:${swatchColor};border:2px solid rgba(0,0,0,.15);display:inline-block;"></span>
+            <span>${option}</span>
+          </span>
+        `;
+      } else {
+        btn.textContent = option;
+      }
+
       btn.disabled = !gameReady || ended;
       btn.addEventListener('click', () => choose(option));
       choices.appendChild(btn);
@@ -1170,8 +1139,9 @@
     setChoiceButtonsEnabled(false);
 
     const secs = (performance.now() - roundStart) / 1000;
+    const correct = currentRound.correctAnswers.includes(selected);
 
-    if(selected === currentRound.answer){
+    if(correct){
       playCorrectSound();
       score += 10;
       combo += 1;
@@ -1194,7 +1164,9 @@
       playWrongSound();
       score = Math.max(0, score - 10);
       combo = 0;
-      msgEl.textContent = '❌ Wrong! −10';
+
+      const answerText = currentRound.correctAnswers.join(' or ');
+      msgEl.textContent = `❌ Wrong! −10 • Correct answer: ${answerText}`;
       msgEl.className = 'msg bad';
     }
 
@@ -1205,7 +1177,25 @@
         gameReady = true;
         newRound();
       }
-    }, 350);
+    }, 500);
+  }
+
+  function newRound(){
+    if(ended || !mode) return;
+
+    const theme = themes[rand(0, themes.length - 1)];
+    const data = theme.labels.map(label => ({
+      label,
+      value: mode === 'easy' ? rand(1, 10) : rand(2, 15)
+    }));
+
+    currentRound = buildQuestion(theme.title, data);
+    renderRound(currentRound);
+    setChoiceButtonsEnabled(true);
+    roundStart = performance.now();
+
+    msgEl.textContent = '';
+    msgEl.className = 'msg';
   }
 
   function saveHighScore(){
